@@ -62,8 +62,9 @@ def register_middlewares(app):
 
 
 def register_routers(app):
-    from bebinca.urls import chat_url
+    from bebinca.urls import chat_url, user_url
     app.router.mount('/chats', chat_url.chat_url)
+    app.router.mount('/users', user_url.user_url)
 
 
 app = create_app()

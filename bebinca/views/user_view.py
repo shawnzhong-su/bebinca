@@ -14,6 +14,6 @@ async def get_access_token(request):
     is_pwd = jwt_util.validate_password(password, db_password)
     if not is_pwd:
         abort(403, 'invalid password')
-    access_token = jwt_util.generate_token({'id': user_info['id']})
+    access_token = jwt_util.generate_token({'id': user_info['ID']})
     jwt_token = {'access_token': access_token, 'token_type': 'bearer'}
     return jsonify(jwt_token)

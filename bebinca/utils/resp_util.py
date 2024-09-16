@@ -5,3 +5,6 @@ class BaseResponse:
         self.error_code = None
         self.message = None
         self.data = None
+
+    def to_dict(self):
+        return self.__dict__

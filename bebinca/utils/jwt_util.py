@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 import bcrypt  # python -m pip install bcrypt
 import jwt  # python -m pip install pyjwt
-from jwt.exceptions import ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 from bebinca.configs import settings
 from bebinca.exts.logs import logger
@@ -27,19 +27,26 @@ def generate_token(data: dict):
 
 
 def extract_uid(token: str):
-    decoded_payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    secret_key = settings.jwt_secret_key
+    jwt_algorithm = settings.jwt_algorithm
+    decoded_payload = jwt.decode(token, secret_key, algorithms=[jwt_algorithm])
     user_id = decoded_payload.get('id')
-    user_id = int(user_id)
     return user_id
 
 
 def verify_token(request):
-    token = request.headers.get('Authorization')
-    if not token:
-        return None, 'token is missing'
+    authorization_header = request.headers.get('Authorization')
+    if authorization_header and authorization_header.startswith('Bearer '):
+        jwt_token = authorization_header[len('Bearer '):]
+        if not jwt_token:
+            return None, 'token is missing'
+    else:
+        return None, 'Authorization header is missing or does not contain a Bearer token'
     try:
-        user_id = extract_uid(token)
-    except (ExpiredSignatureError, InvalidTokenError):
+        user_id = extract_uid(jwt_token)
+    except (ExpiredSignatureError,):
+        return None, 'token has expired'
+    except (InvalidTokenError,):
         return None, 'invalid token'
     except Exception as e:
         logger.error(f'token verification error: {str(e)}')

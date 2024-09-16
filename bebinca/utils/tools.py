@@ -36,6 +36,7 @@ def jsonify(*args, **kwargs):
         content = args or kwargs
     response = BaseResponse()
     response.data = content
+    response = response.to_dict()
     return JsonExtendResponse(response)
 
 
@@ -44,6 +45,7 @@ def abort(error_code, message):
     response.status = False
     response.error_code = error_code
     response.message = message
+    response = response.to_dict()
     return JsonExtendResponse(response)
 
 
