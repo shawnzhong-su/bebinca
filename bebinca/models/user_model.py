@@ -1,0 +1,21 @@
+from datetime import datetime
+
+from bebinca.models.base import BaseModel
+
+
+class UserModel(BaseModel):
+
+    async def get_user_by_phone(self, phone_number):
+        sql_str = '''
+            SELECT
+                ID, Name, Phone, PasswordHash, CreatedTime
+            FROM
+                users
+            WHERE
+                Phone = %s
+        '''
+        await self.conn()
+        await self.execute(sql_str, (phone_number,))
+        user_info = self.cursor.fetchone()
+        await self.close()
+        return user_info
