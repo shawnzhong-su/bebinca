@@ -4,9 +4,11 @@ from functools import lru_cache
 from dotenv import load_dotenv
 
 from bebinca.configs.dev_conf import DevSettings
+from bebinca.configs.prod_conf import ProdSettings
 
 config = {
     'dev': DevSettings,
+    'prod': ProdSettings,
 }
 
 
