@@ -26,6 +26,7 @@ class ChatModel(BaseModel):
                 chats
             WHERE
                 UserID = %s
+            LIMIT 100
         '''
         await self.conn()
         await self.execute(sql_str, (user_id,))

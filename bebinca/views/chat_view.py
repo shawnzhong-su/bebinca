@@ -152,3 +152,37 @@ async def send_message(request):
     await ContentModel().add_content(message_id, content)
 
     return StreamingResponse(stream_data(conversation_id, chat_id, trace_id, content), media_type='text/event-stream')
+
+
+# 所有会话
+async def get_chats(request):
+    user_id, message = jwt_util.verify_token(request)  # 用户鉴权
+    if not user_id:
+        error_code = ErrorCode.USER_NOT_FOUND.value
+        message = 'user not found at send_message'
+        logger.error(message)
+        abort(error_code, message)
+
+    chats = await ChatModel().get_chats(user_id)
+    return chats
+
+
+# 所有问答
+async def get_messages(request):
+    user_id, message = jwt_util.verify_token(request)  # 用户鉴权
+    if not user_id:
+        error_code = ErrorCode.USER_NOT_FOUND.value
+        message = 'user not found at send_message'
+        logger.error(message)
+        abort(error_code, message)
+
+    body = await request.json()
+    conversation_id = body.get('conversation_id')
+    if not conversation_id:
+        error_code = ErrorCode.PARAMETER_MISSING.value
+        message = 'missing conversation_id at get_messages'
+        logger.error(message)
+        abort(error_code, message)
+
+    chats = await MessageModel().get_messages(conversation_id)
+    return chats
