@@ -9,6 +9,9 @@ from bebinca.exts.requests import httpx_common, httpx_stream
 from bebinca.utils.error_code import ErrorCode
 from bebinca.utils.tools import jsonify, abort
 from bebinca.utils import jwt_util, tools
+from bebinca.models.chat_model import ChatModel
+from bebinca.models.message_model import MessageModel
+from bebinca.models.content_model import ContentModel
 
 api_key = settings.ai_api_key
 workspace_id = settings.ai_workspace_id
@@ -69,6 +72,7 @@ async def get_chat_id(request):
         message = 'missing conversation_id at chat_id'
         logger.error(f'{message}:{data}')
         abort(error_code, message)
+    await ChatModel().add_chat(conversation_id, title, user_id)
     return jsonify(conversation_id)
 
 
@@ -95,7 +99,7 @@ async def get_response(conversation_id, content):
         yield f'data: {tools.dict_to_json(error_msg)}\n\n'
 
 
-async def stream_data(conversation_id, content):
+async def stream_data(conversation_id, chat_id, trace_id, content):
     full_content = []
     async for line in get_response(conversation_id, content):
         answer = line.replace('data: ', '')
@@ -111,6 +115,10 @@ async def stream_data(conversation_id, content):
             content = answer.get('content')
             full_content.append(content)
             yield f'{content}\n'
+
+    content_str = ''.join(full_content) if full_content else 'error'
+    message_id = await MessageModel().add_message(chat_id, trace_id, 'robot')
+    await ContentModel().add_content(message_id, content_str)
 
 
 async def send_message(request):
@@ -137,4 +145,10 @@ async def send_message(request):
         logger.error(message)
         abort(error_code, message)
 
-    return StreamingResponse(stream_data(conversation_id, content), media_type='text/event-stream')
+    trace_id = tools.generate_uuid()
+    chat_info = await ChatModel().get_chat_by_conversation(conversation_id)
+    chat_id = chat_info['ID']
+    message_id = await MessageModel().add_message(chat_id, trace_id, 'user')
+    await ContentModel().add_content(message_id, content)
+
+    return StreamingResponse(stream_data(conversation_id, chat_id, trace_id, content), media_type='text/event-stream')

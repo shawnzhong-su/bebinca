@@ -15,10 +15,10 @@ CREATE TABLE users (
 
 CREATE TABLE chats (
     ID INT(10) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    ConversationID VARCHAR(100) NOT NULL COMMENT '大模型的会话ID',
     Title VARCHAR(255) NOT NULL COMMENT '会话标题',
     UserID INT(10) NOT NULL COMMENT 't_users',
     CreatedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    EndedTime TIMESTAMP NULL COMMENT '结束时间',
 
     PRIMARY KEY (ID) USING BTREE,
     INDEX IdxUserID (UserID) USING BTREE,
@@ -29,7 +29,8 @@ CREATE TABLE chats (
 CREATE TABLE messages (
     ID INT(10) NOT NULL AUTO_INCREMENT COMMENT 'ID',
     ChatID INT(10) NOT NULL COMMENT 't_chats',
-    Sender VARCHAR(50) NOT NULL COMMENT 'user or bot',
+    TraceID VARCHAR(100) NOT NULL COMMENT '每次问答的配对',
+    Sender VARCHAR(50) NOT NULL COMMENT 'user or robot',
     CreatedTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
 
     PRIMARY KEY (ID) USING BTREE,
@@ -38,7 +39,7 @@ CREATE TABLE messages (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='消息';
 
 
-CREATE TABLE message_contents (
+CREATE TABLE contents (
     MessageID INT(10) NOT NULL COMMENT 't_messages',
     Content TEXT NOT NULL COMMENT '消息内容',
 

@@ -33,5 +33,5 @@ httpx_stream = httpx.AsyncClient(limits=limits, timeout=timeout)
 
 
 async def close_httpx():
-    await httpx_common.close()
-    await httpx_stream.close()
+    await httpx_common.aclose()
+    await httpx_stream.aclose()

@@ -1,4 +1,6 @@
+import hashlib
 import json
+import uuid
 from datetime import datetime, date
 from decimal import Decimal
 
@@ -61,3 +63,10 @@ def dict_to_json_ea(data=None):
 
 def json_to_dict(json_data):
     return json.loads(json_data)
+
+
+def generate_uuid():
+    random_uuid = str(uuid.uuid4())
+    md5 = hashlib.md5()
+    md5.update(random_uuid.encode('utf-8'))
+    return md5.hexdigest().lower()
