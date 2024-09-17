@@ -1,8 +1,8 @@
 from bebinca.configs.base_conf import BaseSettings
 
 
-class DevSettings(BaseSettings):
-    env = 'dev'
+class ProdSettings(BaseSettings):
+    env = 'prod'
 
     # mysql
     db_name = 'WantSun$bebinca'
